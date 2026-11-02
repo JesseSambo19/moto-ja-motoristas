@@ -1,11 +1,11 @@
 {
-    "name": "moto_ja_motorista",
-    "short_name": "moto_ja_motorista",
+    "name": "MotoJá Motorista",
+    "short_name": "MotoJá Motorista",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Aplicação MotoJá para motoristas de moto-táxi.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

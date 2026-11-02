@@ -184,7 +184,7 @@ class RoadRoutingService {
     );
     try {
       final response = await _client
-          .get(uri, headers: const {'User-Agent': 'MotoJaMotorista/1.0'})
+          .get(uri, headers: const {'User-Agent': 'MotoJaMotoqueiro/1.0'})
           .timeout(const Duration(seconds: 18));
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw RouteException(

@@ -288,7 +288,7 @@ class _DriverHomeState extends State<DriverHome> {
           );
         if (profile['vehicle_type'] != 'moto')
           throw const ApiException(
-            'A MotoJá Motorista aceita apenas contas de moto-táxi.',
+            'A aplicação MotoJá Motorista aceita apenas contas de moto-táxi.',
           );
         user = profile;
         await _refreshSummary();
@@ -315,7 +315,7 @@ class _DriverHomeState extends State<DriverHome> {
   Future<Position> _position() async {
     if (!await Geolocator.isLocationServiceEnabled())
       throw const ApiException(
-        'Ativa a localização do telemóvel para ficares online.',
+        'Ativa a localização do telemóvel para ficares disponível.',
       );
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied)
@@ -590,7 +590,7 @@ class _DriverHomeState extends State<DriverHome> {
         );
       if (profile['vehicle_type'] != 'moto')
         throw const ApiException(
-          'A MotoJá Motorista aceita apenas contas de moto-táxi.',
+          'A aplicação MotoJá Motorista aceita apenas contas de moto-táxi.',
         );
       if (result['token'] is! String)
         throw const ApiException('A API não devolveu um token de acesso.');
@@ -1011,7 +1011,7 @@ class _DriverHomeState extends State<DriverHome> {
                         const SizedBox(width: 8),
                         Text(
                           available
-                              ? 'Online · a receber pedidos'
+                              ? 'Disponível · a receber pedidos'
                               : ride == null
                               ? 'Desligado'
                               : 'Em viagem',
@@ -1028,8 +1028,8 @@ class _DriverHomeState extends State<DriverHome> {
                     if (ride == null)
                       Text(
                         available
-                            ? 'A tua localização é partilhada enquanto estiveres online.'
-                            : 'Fica online para receber pedidos de moto-táxi próximos.',
+                            ? 'A tua localização é partilhada enquanto estiveres disponível.'
+                            : 'Fica disponível para receber pedidos de moto-táxi próximos.',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                   ],
@@ -1073,8 +1073,8 @@ class _DriverHomeState extends State<DriverHome> {
               if (!available)
                 const _EmptyCard(
                   icon: Icons.power_settings_new,
-                  title: 'Estás offline',
-                  message: 'Fica online quando estiveres pronto para aceitar pedidos.',
+                  title: 'Estás indisponível',
+                  message: 'Ativa a disponibilidade quando estiveres pronto para aceitar pedidos.',
                 ),
               if (available && rides.isEmpty)
                 const _EmptyCard(

@@ -1,6 +1,6 @@
-# MotoJá Motorista
+# MotoJá Motoqueiro
 
-Aplicação Flutter independente para motoristas de moto-táxi. O código do motorista fica em `moto_ja_motorista/`; a aplicação de passageiros em `moto_ja/` não foi alterada.
+Aplicação Flutter independente para motoqueiros de moto-táxi. O código do motoqueiro fica em `moto_ja_motorista/`; a aplicação de passageiros em `moto_ja/` não foi alterada.
 
 ## Requisitos
 
@@ -31,21 +31,21 @@ futuro e ainda não é usado pela app.
 
 ## Conta de demonstração
 
-Conta de motorista criada na base de dados local configurada para demonstrações:
+Conta de motoqueiro criada na base de dados local configurada para demonstrações:
 
 - **Telefone:** `+244900000123`
 - **Palavra-passe:** `MotoJaDemo2026!`
 - **Veículo:** Moto · Demo Motorcycle · matrícula `DEMO-001`
 
-Usa estas credenciais no ecrã de entrada do motorista. Esta conta depende da base
+Usa estas credenciais no ecrã de entrada do motoqueiro. Esta conta depende da base
 de dados local onde foi criada e não deve ser usada num ambiente de produção.
 
 ## Funcionalidades
 
-- Interface em português, autenticação de motorista e token guardado com `flutter_secure_storage`.
+- Interface em português, autenticação de motoqueiro e token guardado com `flutter_secure_storage`.
 - Estado online/offline, permissão de localização e envio da posição enquanto a aplicação está aberta.
 - Pedidos de moto-táxi próximos atualizados por polling a cada 2 segundos, com aviso quando chega um novo pedido.
-- Aceitação do pedido, mapa com posição do motorista, recolha e destino, rota rodoviária, instruções por voz em português, recálculo ao sair da rota, Google Maps externo e chamada ao passageiro.
+- Aceitação do pedido, mapa com posição do motoqueiro, recolha e destino, rota rodoviária, instruções por voz em português, recálculo ao sair da rota, Google Maps externo e chamada ao passageiro.
 - Etapas da viagem: chegar ao ponto de recolha, iniciar e concluir. Uma viagem ativa é recuperada depois de reiniciar a aplicação.
 - Resumo de tarifas brutas e viagens concluídas no dia, além das cinco viagens concluídas mais recentes.
 
