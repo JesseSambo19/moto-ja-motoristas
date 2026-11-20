@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'utils/app_urls.dart';
@@ -114,13 +115,50 @@ class DriverApi {
   DriverApi({http.Client? client}) : client = client ?? http.Client();
   final http.Client client;
   static const String baseUrl = API_URL;
-  static const _storage = FlutterSecureStorage();
   static const _tokenKey = 'motoja_driver_api_token';
+  static const _profileKey = 'motoja_driver_profile';
+  static const _legacyStorage = FlutterSecureStorage();
 
-  Future<String?> readToken() async => _storage.read(key: _tokenKey);
-  Future<void> saveToken(String token) =>
-      _storage.write(key: _tokenKey, value: token);
-  Future<void> clearToken() => _storage.delete(key: _tokenKey);
+  Future<String?> readToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedToken = prefs.getString(_tokenKey);
+    if (cachedToken != null) return cachedToken;
+    // Migrate sessions created by earlier app versions.
+    final legacyToken = await _legacyStorage.read(key: _tokenKey);
+    if (legacyToken != null) {
+      await prefs.setString(_tokenKey, legacyToken);
+      try {
+        await _legacyStorage.delete(key: _tokenKey);
+      } catch (_) {}
+    }
+    return legacyToken;
+  }
+  Future<void> saveToken(String token) async {
+    await (await SharedPreferences.getInstance()).setString(_tokenKey, token);
+    try {
+      await _legacyStorage.delete(key: _tokenKey);
+    } catch (_) {}
+  }
+  Future<Map<String, dynamic>?> readCachedProfile() async {
+    final json = (await SharedPreferences.getInstance()).getString(_profileKey);
+    if (json == null) return null;
+    try {
+      return Map<String, dynamic>.from(jsonDecode(json) as Map);
+    } catch (_) {
+      return null;
+    }
+  }
+  Future<void> saveCachedProfile(Map<String, dynamic> profile) async {
+    await (await SharedPreferences.getInstance()).setString(_profileKey, jsonEncode(profile));
+  }
+  Future<void> clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+    await prefs.remove(_profileKey);
+    try {
+      await _legacyStorage.delete(key: _tokenKey);
+    } catch (_) {}
+  }
 
   Future<Map<String, dynamic>> request(
     String method,
@@ -148,7 +186,7 @@ class DriverApi {
           ? <String, dynamic>{}
           : jsonDecode(response.body) as Map<String, dynamic>;
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        if (response.statusCode == 401) await clearToken();
+        if (response.statusCode == 401) await clearSession();
         final errors = data['errors'];
         final first = errors is Map && errors.isNotEmpty
             ? errors.values.first
@@ -280,6 +318,7 @@ class _DriverHomeState extends State<DriverHome> {
   Future<void> _restoreSession() async {
     try {
       if (await api.readToken() != null) {
+        user = await api.readCachedProfile();
         final result = await api.request('GET', 'me');
         final profile = Map<String, dynamic>.from(result['user'] as Map);
         if (profile['role'] != 'driver')
@@ -291,6 +330,7 @@ class _DriverHomeState extends State<DriverHome> {
             'A aplicação MotoJá Motorista aceita apenas contas de moto-táxi.',
           );
         user = profile;
+        await api.saveCachedProfile(profile);
         await _refreshSummary();
         available = profile['is_available'] == true;
         final active = await api.request('GET', 'driver/rides/active');
@@ -305,8 +345,12 @@ class _DriverHomeState extends State<DriverHome> {
         }
       }
     } catch (e) {
-      await api.clearToken();
-      error = e.toString();
+      if (e is ApiException && e.statusCode == 401) {
+        await api.clearSession();
+        user = null;
+      } else if (user == null) {
+        error = e.toString();
+      }
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -595,6 +639,7 @@ class _DriverHomeState extends State<DriverHome> {
       if (result['token'] is! String)
         throw const ApiException('A API não devolveu um token de acesso.');
       await api.saveToken(result['token'] as String);
+      await api.saveCachedProfile(profile);
       await _refreshSummary();
       final active = await api.request('GET', 'driver/rides/active');
       if (!mounted) return;
@@ -865,7 +910,7 @@ class _DriverHomeState extends State<DriverHome> {
         );
       await api.request('DELETE', 'auth/session');
     } catch (_) {}
-    await api.clearToken();
+    await api.clearSession();
     if (mounted)
       setState(() {
         user = null;
